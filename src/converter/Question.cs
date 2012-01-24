@@ -13,13 +13,21 @@ namespace converter
         private Dictionary<string, string> answers;
         private string correctAnswer;
         private string reference;
+        private string chapter;
 
-        public Question(string text, Dictionary<string, string> answers, string correct, string reference)
+        public string Chapter
+        {
+            get { return chapter; }
+            private set { chapter = value; }
+        }
+
+        public Question(string text, Dictionary<string, string> answers, string correct, string reference, string chapter)
         {
             this.text = text;
             this.answers = answers;
             this.correctAnswer = correct;
             this.reference = reference;
+            Chapter = chapter;
         }
 
         public void Write(StreamWriter stream)
@@ -67,6 +75,7 @@ namespace converter
             Dictionary<string, string> answers = new Dictionary<string,string>();
             string correct;
             string reference;
+            string chapter;
 
             //Determine the type of content this line has
             while (!Regex.IsMatch(lines[position], @"^[0-9]+\.\t(.*)"))
@@ -87,41 +96,46 @@ namespace converter
                 if (++position >= lines.Count) { return null; }
             }
 
-            string current = lines[position];
-            if (++position >= lines.Count) { return null; }
-            string next = lines[position];
-            while (Regex.IsMatch(current, @"^[A-Z]\.\t"))
+            while (Regex.IsMatch(lines[position], @"^[A-Z]\.\t"))
             {
-                match = Regex.Match(current, @"^([A-Z])\.\s*(.*)");
+                match = Regex.Match(lines[position], @"^([A-Z])\.\s*(.*)");
                 if (match.Groups.Count < 3)
                 {
                     return null;
                 }
                 string answer = match.Groups[2].Value;
 
-                current = next;
-                if (++position >= lines.Count) { return null; }
-                next = lines[position];
+                if (position + 3 >= lines.Count) { return null; }
 
-                while (!Regex.IsMatch(current, @"^[A-Z]\.\t") && !Regex.IsMatch(next, @"^Answer\:"))
+                while (!Regex.IsMatch(lines[position + 1], @"^[A-Z]\.\t") && !Regex.IsMatch(lines[position + 3], @"^Answer\:"))
                 {
-                    answer += " " + current;
-                    current = next;
                     if (++position >= lines.Count) { return null; }
-                    next = lines[position];
+                    answer += " " + lines[position];
                 }
-                answers.Add(match.Groups[1].Value, answer);
+                try
+                {
+                    answers.Add(match.Groups[1].Value, answer);
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                if (++position >= lines.Count) { return null; }
             }
-            reference = current;
+            chapter = lines[position];
 
-            match = Regex.Match(next, @"^Answer\:\s*(.*)");
+            if (++position >= lines.Count) { return null; }
+            reference = lines[position];
+
+            if (++position >= lines.Count) { return null; }
+            match = Regex.Match(lines[position], @"^Answer\:\s*(.*)");
             if (match.Groups.Count < 2)
             {
                 return null;
             }
             correct = match.Groups[1].Value;
 
-            return new Question(text, answers, correct, reference);
+            return new Question(text, answers, correct, reference, chapter);
         }
     }
 }

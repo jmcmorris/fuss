@@ -69,7 +69,7 @@ namespace converter
                 }
             }
 
-            List<Question> questions = new List<Question>();
+            Dictionary<string, List<Question>> chapters = new Dictionary<string, List<Question>>();
             int position = 0;
             while (position < lines.Count)
             {
@@ -78,16 +78,36 @@ namespace converter
                 {
                     break;
                 }
-                questions.Add(question);
+                if (!chapters.ContainsKey(question.Chapter))
+                {
+                    chapters.Add(question.Chapter, new List<Question>());
+                }
+                chapters[question.Chapter].Add(question);
                 ++position;
             }
 
-            //Now that we have a list of questions lets write them out to the new format
-            using (FileStream fileStream = File.OpenWrite(output + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(file) + ".txt"))
+            //Now that we have all the chapters as lists of questions lets write them out to the new format
+            //One file per chapter
+            string directory = output + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(file);
+            foreach (char invalid in Path.GetInvalidPathChars())
             {
-                using (StreamWriter stream = new StreamWriter(fileStream, Encoding.UTF8))
+                directory = directory.Replace(invalid.ToString(), "");
+            }
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            foreach (var chapter in chapters)
+            {
+                string filename = chapter.Key;
+                foreach (char invalid in Path.GetInvalidFileNameChars())
                 {
-                    foreach (Question question in questions)
+                    filename = filename.Replace(invalid.ToString(), "");
+                }
+                string filePath = directory + Path.DirectorySeparatorChar + filename + ".txt";
+                using (StreamWriter stream = File.CreateText(filePath))
+                {
+                    foreach (Question question in chapter.Value)
                     {
                         question.Write(stream);
                     }
