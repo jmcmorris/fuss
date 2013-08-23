@@ -36,14 +36,9 @@ namespace converter
         private void convertClick(object sender, RoutedEventArgs e)
         {
             //Kick off a file conversion
-            
             //First prompt the user for all of the files to convert
             var fileDialog = new Microsoft.Win32.OpenFileDialog();
-            fileDialog.FileName = "";
-            fileDialog.Multiselect = true;
-            fileDialog.DefaultExt = ".rtf";
-            fileDialog.Filter = "Exported QG Files (.rtf)|*.rtf";
-            Nullable<bool> result = fileDialog.ShowDialog();
+            Nullable<bool> result = showRtfFileSelect(fileDialog);
 
             if (result == true)
             {
@@ -54,24 +49,48 @@ namespace converter
                 if (folderResult == System.Windows.Forms.DialogResult.OK)
                 {
                     //We are now done with user input - lets get to work converting the files
-                    convertButton.Visibility = System.Windows.Visibility.Collapsed;
-                    progressGrid.Visibility = System.Windows.Visibility.Visible;
-
-                    converter = new Converter(fileDialog.FileNames,
-                        folderDialog.SelectedPath,
-                        new ConversionCompletedCallback(conversionCompleted),
-                        Dispatcher);
-                    convertThread = new Thread(new ThreadStart(converter.perform));
-                    convertThread.Start();
+                    startConversion(fileDialog.FileNames, folderDialog.SelectedPath, ConverterType.TXT);
                 }
             }
+        }
+
+        private void convertXlsxClick(object sender, RoutedEventArgs e)
+        {
+            var fileDialog = new Microsoft.Win32.OpenFileDialog();
+            Nullable<bool> result = showRtfFileSelect(fileDialog);
+            startConversion(fileDialog.FileNames, "", ConverterType.XLSX);
+        }
+
+        private void startConversion(string[] files, string output, ConverterType type)
+        {
+            convertButton.Visibility = System.Windows.Visibility.Collapsed;
+            convertXlsxButton.Visibility = System.Windows.Visibility.Collapsed;
+            progressGrid.Visibility = System.Windows.Visibility.Visible;
+
+            converter = new Converter(
+                type,
+                files,
+                output,
+                new ConversionCompletedCallback(conversionCompleted),
+                Dispatcher);
+            convertThread = new Thread(new ThreadStart(converter.perform));
+            convertThread.Start();
+        }
+
+        private Nullable<bool> showRtfFileSelect(Microsoft.Win32.OpenFileDialog fileDialog)
+        {
+            fileDialog.FileName = "";
+            fileDialog.Multiselect = true;
+            fileDialog.DefaultExt = ".rtf";
+            fileDialog.Filter = "Exported QG Files (.rtf)|*.rtf";
+            return fileDialog.ShowDialog();
         }
 
         private void conversionCompleted()
         {
             convertButton.Visibility = System.Windows.Visibility.Visible;
+            convertXlsxButton.Visibility = System.Windows.Visibility.Visible;
             progressGrid.Visibility = System.Windows.Visibility.Collapsed;
         }
-
     }
 }

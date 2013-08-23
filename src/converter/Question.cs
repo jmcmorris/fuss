@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
+using OfficeOpenXml;
 
 namespace converter
 {
@@ -62,6 +63,25 @@ namespace converter
             stream.WriteLine("::" + reference);
             stream.WriteLine("::" + questionText);
             stream.WriteLine();
+        }
+
+        public void WriteXlsx(ExcelWorksheet worksheet, int row)
+        {
+            worksheet.Cells[row, 5].Value = this.text;
+            int incorrectQuestionCount = 0;
+            foreach (var answer in answers)
+            {
+                if (correctAnswer == answer.Key)
+                {
+                    worksheet.Cells[row, 6].Value = answer.Value;
+                }
+                else
+                {
+                    worksheet.Cells[row, 7 + incorrectQuestionCount].Value = answer.Value;
+                    ++incorrectQuestionCount;
+                }
+            }
+            worksheet.Cells[row, 10].Value = reference;
         }
 
         /// <summary>

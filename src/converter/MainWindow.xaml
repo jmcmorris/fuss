@@ -1,11 +1,12 @@
 ﻿<Window x:Class="converter.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="FUSS" Height="102" Width="254">
+        Title="FUSS" Height="175" Width="254">
     <Grid>
-        <Button x:Name="convertButton" Content="Make a Fuss" Margin="8" IsDefault="True" Click="convertClick"/>
+        <Button x:Name="convertButton" Content="Make a Fuss" Margin="8,12,8,0" Height="54"  IsDefault="True" Click="convertClick" VerticalAlignment="Top" DataContext="{Binding}" />
+        <Button Content="Make a Fuss (XLSX)" IsDefault="True" Margin="8,72,8,0" Name="convertXlsxButton" Height="54" VerticalAlignment="Top" Click="convertXlsxClick" />
         <Grid Margin="8" x:Name="progressGrid" Visibility="Hidden">
-            <ProgressBar x:Name="progressBar" Minimum="0" Maximum="1" HorizontalAlignment="Stretch" IsIndeterminate="True" />
+            <ProgressBar x:Name="progressBar" Minimum="0" Maximum="1" Height="54"  HorizontalAlignment="Stretch" IsIndeterminate="True" />
             <TextBlock x:Name="progressText" HorizontalAlignment="Center" VerticalAlignment="Center">Fussing...</TextBlock>
         </Grid>
     </Grid>
