@@ -45,7 +45,7 @@ namespace converter
                 }
                 catch (Exception ex)
                 {
-                    
+                    System.Console.Write("Failed to convert file due to error: " + ex.Message);
                 }
             }
             object[] param = { };
@@ -178,9 +178,9 @@ namespace converter
                 foreach (var chapter in chapters)
                 {
                     int chapterQuestions = 1;
-                    var match = Regex.Match(chapter.Key, @"Ch ([0-9]+) - (.*)");
-                    int chapterNumber = Convert.ToInt32(match.Groups[1].Value);
-                    string chapterName = match.Groups[2].Value;
+                    var match = Regex.Match(chapter.Key, @"(Ch )?([0-9]+) - (.*)");
+                    int chapterNumber = Convert.ToInt32(match.Groups[2].Value);
+                    string chapterName = match.Groups[3].Value;
                     foreach (var question in chapter.Value)
                     {
                         int row = totalQuestions + 1;
