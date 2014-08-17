@@ -177,21 +177,28 @@ namespace converter
                 int totalQuestions = 1;
                 foreach (var chapter in chapters)
                 {
-                    int chapterQuestions = 1;
-                    var match = Regex.Match(chapter.Key, @"(Ch )?([0-9]+) - (.*)");
-                    int chapterNumber = Convert.ToInt32(match.Groups[2].Value);
-                    string chapterName = match.Groups[3].Value;
-                    foreach (var question in chapter.Value)
+                    try
                     {
-                        int row = totalQuestions + 1;
-                        worksheet.Row(row).Style.WrapText = true;
-                        worksheet.Cells[row, 1].Value = totalQuestions.ToString();
-                        worksheet.Cells[row, 2].Value = chapterName;
-                        worksheet.Cells[row, 3].Value = chapterNumber.ToString();
-                        worksheet.Cells[row, 4].Value = chapterQuestions.ToString();
-                        question.WriteXlsx(worksheet, row);
-                        ++totalQuestions;
-                        ++chapterQuestions;
+                        int chapterQuestions = 1;
+                        var match = Regex.Match(chapter.Key, @"(Ch )?([0-9]+) [-–] (.*)");
+                        int chapterNumber = Convert.ToInt32(match.Groups[2].Value);
+                        string chapterName = match.Groups[3].Value;
+                        foreach (var question in chapter.Value)
+                        {
+                            int row = totalQuestions + 1;
+                            worksheet.Row(row).Style.WrapText = true;
+                            worksheet.Cells[row, 1].Value = totalQuestions.ToString();
+                            worksheet.Cells[row, 2].Value = chapterName;
+                            worksheet.Cells[row, 3].Value = chapterNumber.ToString();
+                            worksheet.Cells[row, 4].Value = chapterQuestions.ToString();
+                            question.WriteXlsx(worksheet, row);
+                            ++totalQuestions;
+                            ++chapterQuestions;
+                        }
+                    }
+                    catch (Exception ex) {
+                        MessageBox.Show("Encountered an error while attempting to parse question " + totalQuestions, "Question Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
                     }
                 }
                 package.Workbook.Properties.Title = Path.GetFileNameWithoutExtension(file.Name);
